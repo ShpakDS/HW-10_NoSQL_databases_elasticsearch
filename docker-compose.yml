@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: php:8.0-fpm
+    platform: linux/amd64
+    container_name: php_app
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - elasticsearch
+    environment:
+      - PHP_MEMORY_LIMIT=4096M
+    command: >
+      bash -c "echo 'memory_limit = 4096M' > /usr/local/etc/php/conf.d/memory-limit.ini &&
+                php-fpm"
+
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    platform: linux/amd64
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+volumes:
+  es_data:
